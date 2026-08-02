@@ -9,7 +9,7 @@ PROVIDER_DEFAULT_MODELS: dict[str, str] = {
     "anthropic": "claude-opus-4-6",
     "openrouter": "anthropic/claude-sonnet-4-5",
     "cerebras": "qwen-3-235b-a22b-instruct-2507",
-    "ollama": "llama3.2",
+    "ollama": "gemma",
 }
 
 

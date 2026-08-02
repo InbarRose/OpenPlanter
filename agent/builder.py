@@ -30,7 +30,7 @@ _OPENAI_RE = re.compile(r"^(gpt|o[1-4]-|o[1-4]$|chatgpt|dall-e|tts-|whisper)", r
 _CEREBRAS_RE = re.compile(r"^(llama.*cerebras|qwen-3|gpt-oss|zai-glm)", re.IGNORECASE)
 _OLLAMA_RE = re.compile(
     r"^(llama|mistral|gemma|phi|codellama|deepseek|vicuna|tinyllama|"
-    r"neural-chat|dolphin|wizardlm|orca|nous-hermes|command-r|qwen(?!-3))",
+    r"neural-chat|dolphin|wizardlm|orca|nous-hermes|command-r|qwen(?!-3)|gemma)",
     re.IGNORECASE,
 )
 

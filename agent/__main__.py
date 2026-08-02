@@ -261,6 +261,11 @@ def _load_credentials(
     if args.voyage_api_key:
         creds.voyage_api_key = args.voyage_api_key.strip() or creds.voyage_api_key
 
+    # If provider is set to ollama via env, don't prompt for keys.
+    provider_from_env = os.getenv("OPENPLANTER_PROVIDER", "").strip().lower()
+    if provider_from_env == "ollama":
+        allow_prompt = False
+
     changed_by_prompt = False
     if allow_prompt:
         updated, changed_by_prompt = prompt_for_credentials(
@@ -271,7 +276,7 @@ def _load_credentials(
     elif args.configure_keys:
         print("Headless/non-interactive mode: skipping interactive key prompt.")
 
-    if not creds.has_any():
+    if not creds.has_any() and provider_from_env != "ollama":
         print(
             "No API keys are configured. "
             "Set keys with --configure-keys, env vars, or .env files."

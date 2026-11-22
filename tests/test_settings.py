@@ -211,6 +211,11 @@ class ValidateModelProviderTests(unittest.TestCase):
         _validate_model_provider("claude-opus-4-6", "openrouter")
         _validate_model_provider("gpt-5.2", "openrouter")
 
+    def test_ollama_allows_any_local_model_tag(self) -> None:
+        _validate_model_provider("gemma4", "ollama")
+        _validate_model_provider("gpt-oss:20b", "ollama")
+        _validate_model_provider("qwen3-coder:30b", "ollama")
+
     def test_unknown_model_passes(self) -> None:
         _validate_model_provider("my-custom-model", "openai")
         _validate_model_provider("some-random-model", "anthropic")

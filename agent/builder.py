@@ -30,7 +30,7 @@ _OPENAI_RE = re.compile(r"^(gpt|o[1-4]-|o[1-4]$|chatgpt|dall-e|tts-|whisper)", r
 _CEREBRAS_RE = re.compile(r"^(llama.*cerebras|qwen-3|gpt-oss|zai-glm)", re.IGNORECASE)
 _OLLAMA_RE = re.compile(
     r"^(llama|mistral|gemma|phi|codellama|deepseek|vicuna|tinyllama|"
-    r"neural-chat|dolphin|wizardlm|orca|nous-hermes|command-r|qwen(?!-3)|gemma)",
+    r"neural-chat|dolphin|wizardlm|orca|nous-hermes|command-r|qwen(?!-3))",
     re.IGNORECASE,
 )
 
@@ -52,7 +52,7 @@ def infer_provider_for_model(model: str) -> str | None:
 
 def _validate_model_provider(model_name: str, provider: str) -> None:
     """Raise ``ModelError`` if *model_name* is clearly wrong for *provider*."""
-    if provider == "openrouter":
+    if provider in ("openrouter", "ollama"):
         return
     inferred = infer_provider_for_model(model_name)
     if inferred is None or inferred == provider or inferred == "openrouter":
@@ -104,7 +104,7 @@ def _resolve_model_name(cfg: AgentConfig) -> str:
 def build_model_factory(cfg: AgentConfig) -> ModelFactory | None:
     """Return a factory that creates models by name + optional reasoning effort."""
     def _factory(model_name: str, reasoning_effort: str | None = None) -> AnthropicModel | OpenAICompatibleModel:
-        provider = infer_provider_for_model(model_name)
+        provider = "ollama" if cfg.provider == "ollama" else infer_provider_for_model(model_name)
         effort = reasoning_effort or cfg.reasoning_effort
         if provider == "anthropic" and cfg.anthropic_api_key:
             return AnthropicModel(

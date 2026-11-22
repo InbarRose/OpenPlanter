@@ -6,7 +6,7 @@ import sys
 from datetime import datetime, timezone
 
 from .builder import _fetch_models_for_provider, build_engine, infer_provider_for_model
-from .config import AgentConfig
+from .config import PROVIDER_DEFAULT_MODELS, AgentConfig
 from .credentials import (
     CredentialBundle,
     CredentialStore,
@@ -261,9 +261,9 @@ def _load_credentials(
     if args.voyage_api_key:
         creds.voyage_api_key = args.voyage_api_key.strip() or creds.voyage_api_key
 
-    # If provider is set to ollama via env, don't prompt for keys.
-    provider_from_env = os.getenv("OPENPLANTER_PROVIDER", "").strip().lower()
-    if provider_from_env == "ollama":
+    # If provider is set to ollama via CLI or env, don't prompt for keys.
+    provider_hint = (args.provider or os.getenv("OPENPLANTER_PROVIDER", "")).strip().lower()
+    if provider_hint == "ollama":
         allow_prompt = False
 
     changed_by_prompt = False
@@ -276,7 +276,7 @@ def _load_credentials(
     elif args.configure_keys:
         print("Headless/non-interactive mode: skipping interactive key prompt.")
 
-    if not creds.has_any() and provider_from_env != "ollama":
+    if not creds.has_any() and provider_hint != "ollama":
         print(
             "No API keys are configured. "
             "Set keys with --configure-keys, env vars, or .env files."
@@ -502,10 +502,13 @@ def main() -> None:
     creds = _load_credentials(cfg, args, allow_prompt=not (args.headless or non_tty))
     _apply_runtime_overrides(cfg, args, creds)
 
-    if not cfg.model.strip():
+    model_explicit = bool(args.model or os.getenv("OPENPLANTER_MODEL"))
+    if not cfg.model.strip() or not model_explicit:
         provider_model = settings.default_model_for_provider(cfg.provider)
         if provider_model:
             cfg.model = provider_model
+        elif not model_explicit and cfg.provider in PROVIDER_DEFAULT_MODELS:
+            cfg.model = PROVIDER_DEFAULT_MODELS[cfg.provider]
 
     if args.configure_keys and not args.task and not args.list_models and not args.show_settings:
         print("Credential configuration step complete.")
@@ -523,7 +526,7 @@ def main() -> None:
         raise SystemExit(2)
 
     model_for_check = (cfg.model or "").strip()
-    if model_for_check and cfg.provider != "openrouter":
+    if model_for_check and cfg.provider not in ("openrouter", "ollama"):
         inferred = infer_provider_for_model(model_for_check)
         if inferred and inferred != cfg.provider:
             key = {

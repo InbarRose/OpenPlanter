@@ -3,7 +3,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ripgrep && rm -
 WORKDIR /app
 COPY pyproject.toml .
 COPY agent/ agent/
-RUN pip install --no-cache-dir -e .
+RUN pip install --no-cache-dir -e ".[textual]"
 RUN mkdir -p /workspace
 WORKDIR /workspace
 ENTRYPOINT ["python", "-m", "agent"]

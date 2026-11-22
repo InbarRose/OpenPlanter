@@ -4,6 +4,12 @@ services:
     env_file: .env
     volumes:
       - ./workspace:/workspace
-      - ./agent:/app/agent
+      - ./agent:/app/agent:ro
+      - ./wiki:/workspace/wiki:ro
+      - ./scripts:/workspace/scripts:ro
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     stdin_open: true
     tty: true
